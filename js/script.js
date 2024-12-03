@@ -1,39 +1,40 @@
 "use strict";
 
-const GRID_HEIGHT = 20;
-const GRID_WIDTH = 10;
-const grid = document.getElementById('grid');
-const scoreDisplay = document.getElementById('score');
-const startBtn = document.getElementById('start-btn');
-const pauseBtn = document.getElementById('pause-btn');
+const GRID_HEIGHT = 20; // グリッドの高さ（行数）
+const GRID_WIDTH = 10; // グリッドの幅（列数）
+const grid = document.getElementById('grid'); // グリッド要素
+const scoreDisplay = document.getElementById('score'); // スコア表示要素
+const startBtn = document.getElementById('start-btn'); // スタートボタン
+const pauseBtn = document.getElementById('pause-btn'); // 一時停止ボタン
 
-let cells = [];
-let currentBlockIndex;
-let currentBlock = null;
-let currentPosition = 4;
-let currentRotation = 0;
-let timerId;
-let score = 0;
+let cells = []; // グリッドのセルを格納する配列
+let currentBlockIndex; // 現在のブロックの種類を表すインデックス
+let currentBlock = null; // 現在のブロック形状
+let currentPosition = 4; // 現在のブロックの位置（左上を基準としたインデックス）
+let currentRotation = 0; // 現在のブロックの回転状態
+let timerId; // ブロックを定期的に落下させるタイマーID
+let score = 0; // ゲームスコア
 let isPaused = false; // ゲームが一時停止中かどうか
 
-const tetrominoes = [
-    [   // I
+const tetrominoes = [ // テトロミノの形状を定義
+    [   // I型テトロミノ
         [1, GRID_WIDTH + 1, GRID_WIDTH * 2 + 1, GRID_WIDTH * 3 + 1],
         [GRID_WIDTH, GRID_WIDTH + 1, GRID_WIDTH + 2, GRID_WIDTH + 3]
     ],
-    [   // O
+    [   // O型テトロミノ
         [0, 1, GRID_WIDTH, GRID_WIDTH + 1]
     ],
-    [   // T
+    [   // T型テトロミノ
         [1, GRID_WIDTH, GRID_WIDTH + 1, GRID_WIDTH + 2],
         [0, GRID_WIDTH, GRID_WIDTH + 1, GRID_WIDTH * 2],
         [0, 1, 2, GRID_WIDTH + 1],
-        [1, GRID_WIDTH, GRID_WIDTH + 1, GRID_WIDTH * 2 + 1],
+        [1, GRID_WIDTH, GRID_WIDTH + 1, GRID_WIDTH * 2 + 1]
     ]
-    // Add other tetromino shapes
+    // 他のテトロミノを追加可能
 ];
 
 function createGrid() {
+    // グリッドを作成してセルを追加
     for (let i = 0; i < GRID_HEIGHT * GRID_WIDTH; i++) {
         const cell = document.createElement('div');
         cell.classList.add('cell');
@@ -43,18 +44,21 @@ function createGrid() {
 }
 
 function drawBlock() {
+    // 現在のブロックをグリッドに描画
     currentBlock.forEach(index => {
         cells[currentPosition + index].classList.add('active');
     });
 }
 
 function undrawBlock() {
+    // 現在のブロックをグリッドから削除
     currentBlock.forEach(index => {
         cells[currentPosition + index].classList.remove('active');
     });
 }
 
 function moveDown() {
+    // ブロックを1行下に移動
     if (!isPaused) {
         undrawBlock();
         currentPosition += GRID_WIDTH;
@@ -64,8 +68,11 @@ function moveDown() {
 }
 
 function dropBlock() {
+    // ブロックを一気に落下
     if (!isPaused) {
-        while (!currentBlock.some(index => cells[currentPosition + index + GRID_WIDTH]?.classList.contains('taken') || currentPosition + index + GRID_WIDTH >= GRID_WIDTH * GRID_HEIGHT)) {
+        while (!currentBlock.some(index => 
+            cells[currentPosition + index + GRID_WIDTH]?.classList.contains('taken') || 
+            currentPosition + index + GRID_WIDTH >= GRID_WIDTH * GRID_HEIGHT)) {
             undrawBlock();
             currentPosition += GRID_WIDTH;
         }
@@ -75,29 +82,33 @@ function dropBlock() {
 }
 
 function moveLeft() {
-  if (!isPaused) {
-    undrawBlock();
-    const isAtLeftEdge = currentBlock.some(index => (currentPosition + index) % GRID_WIDTH === 0);
-    if (!isAtLeftEdge) currentPosition -= 1;
-    drawBlock();
-  }
+    // ブロックを左に移動
+    if (!isPaused) {
+        undrawBlock();
+        const isAtLeftEdge = currentBlock.some(index => (currentPosition + index) % GRID_WIDTH === 0);
+        if (!isAtLeftEdge) currentPosition -= 1;
+        drawBlock();
+    }
 }
 
 function moveRight() {
-  if (!isPaused) {
-    undrawBlock();
-    const isAtRightEdge = currentBlock.some(index => (currentPosition + index) % GRID_WIDTH === GRID_WIDTH - 1);
-    if (!isAtRightEdge) currentPosition += 1;
-    drawBlock();
-  }
+    // ブロックを右に移動
+    if (!isPaused) {
+        undrawBlock();
+        const isAtRightEdge = currentBlock.some(index => (currentPosition + index) % GRID_WIDTH === GRID_WIDTH - 1);
+        if (!isAtRightEdge) currentPosition += 1;
+        drawBlock();
+    }
 }
 
 function rotateBlock() {
+    // ブロックを90度回転
     if (!isPaused) {
         undrawBlock();
         const nextRotation = (currentRotation + 1) % tetrominoes[currentBlockIndex].length;
         const nextBlock = tetrominoes[currentBlockIndex][nextRotation];
 
+        // 回転が可能かをチェック
         const isValidRotation = nextBlock.every(index => {
             const newPos = currentPosition + index;
             const isWithinBounds = newPos >= 0 && newPos < GRID_HEIGHT * GRID_WIDTH;
@@ -114,85 +125,62 @@ function rotateBlock() {
     }
 }
 
-
 function freeze() {
-    if (currentBlock.some(index => cells[currentPosition + index + GRID_WIDTH]?.classList.contains('taken') ||
+    // ブロックを固定し、新しいブロックを生成
+    if (currentBlock.some(index => 
+        cells[currentPosition + index + GRID_WIDTH]?.classList.contains('taken') || 
         currentPosition + index + GRID_WIDTH >= GRID_WIDTH * GRID_HEIGHT)) {
-        // 現在のブロックを固定
         currentBlock.forEach(index => cells[currentPosition + index].classList.add('taken'));
-        clearLines();       // 行の消去を確認して処理
-        startNewBlock();    // 新しいブロックを開始
-        checkGameOver();    // ゲームオーバー判定
+        clearLines(); // 行を消去
+        startNewBlock(); // 新しいブロックを開始
+        checkGameOver(); // ゲームオーバー判定
     }
 }
 
 function clearLines() {
+    // 埋まった行を消去し、上の行を下にシフト
     for (let row = 0; row < GRID_HEIGHT; row++) {
         const startIdx = row * GRID_WIDTH;
         const rowCells = cells.slice(startIdx, startIdx + GRID_WIDTH);
 
-        // その行がすべて埋まっている場合
         if (rowCells.every(cell => cell.classList.contains('taken'))) {
-            // スコアを加算
-            score += 100;
+            score += 100; // スコアを更新
             scoreDisplay.textContent = score;
 
-            // ハイライトを追加
             rowCells.forEach(cell => cell.classList.add('highlight'));
-
             setTimeout(() => {
-                // ハイライトを削除して行を消去
-                rowCells.forEach(cell => {
-                    cell.classList.remove('taken', 'active', 'highlight');
-                });
-
-                // 上のブロックを1行分下にシフト
+                rowCells.forEach(cell => cell.classList.remove('taken', 'active', 'highlight'));
                 for (let i = startIdx - 1; i >= 0; i--) {
                     const aboveCell = cells[i];
                     const belowCell = cells[i + GRID_WIDTH];
-
                     belowCell.className = aboveCell.className;
                     aboveCell.className = 'cell';
                 }
-            }, 1000); // 1秒後に消去
+            }, 1000);
         }
     }
 }
 
 function startNewBlock() {
+    // ランダムに新しいブロックを生成
     const random = Math.floor(Math.random() * tetrominoes.length);
-    currentBlockIndex = random; // 選択されたインデックスを設定
-    currentRotation = 0;        // 回転姿勢の初期化
+    currentBlockIndex = random;
+    currentRotation = 0;
     currentBlock = tetrominoes[random][currentRotation];
     currentPosition = 4;
     drawBlock();
 }
 
 function checkGameOver() {
-    // 新しいブロックの初期位置にすでに固定ブロックがある場合
+    // ゲームオーバー判定
     if (currentBlock.some(index => cells[currentPosition + index].classList.contains('taken'))) {
         alert("Game Over!");
-        clearInterval(timerId); // ゲームを停止
-    }
-}
-
-
-function addScore() {
-    for (let i = 0; i < GRID_HEIGHT; i++) {
-        const row = Array.from({ length: GRID_WIDTH }, (_, j) => i * GRID_WIDTH + j);
-        if (row.every(index => cells[index].classList.contains('taken'))) {
-            score += 100;
-            scoreDisplay.textContent = score;
-            row.forEach(index => {
-                cells[index].classList.remove('taken', 'active');
-            });
-            const removed = cells.splice(i * GRID_WIDTH, GRID_WIDTH);
-            removed.forEach(cell => grid.appendChild(cell));
-        }
+        clearInterval(timerId);
     }
 }
 
 document.addEventListener('keydown', event => {
+    // キーボード入力に応じた操作
     if (event.key === 'ArrowLeft') moveLeft();
     else if (event.key === 'ArrowRight') moveRight();
     else if (event.key === 'ArrowDown') dropBlock();
@@ -200,6 +188,7 @@ document.addEventListener('keydown', event => {
 });
 
 pauseBtn.addEventListener('click', () => {
+    // ゲームの一時停止と再開
     if (isPaused) {
         pauseBtn.textContent = 'Pause';
         isPaused = false;
@@ -212,11 +201,11 @@ pauseBtn.addEventListener('click', () => {
 });
 
 function startGame() {
+    // ゲーム開始
     clearInterval(timerId);
     timerId = setInterval(moveDown, 1000);
     startNewBlock();
 }
 
-startBtn.addEventListener('click', startGame);
-
-createGrid();
+startBtn.addEventListener('click', startGame); // スタートボタンのクリックイベント
+createGrid(); // グリッドを生成
