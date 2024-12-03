@@ -102,25 +102,46 @@ function moveRight() {
 }
 
 function rotateBlock() {
-    // ブロックを90度回転
+    // ブロックを90度回転させる関数
+    // 一時停止中でなければ実行する
     if (!isPaused) {
+        // 現在描画されているブロックを消去
         undrawBlock();
+
+        // 次の回転状態を計算
+        // (現在の回転 + 1) を、該当テトロミノの回転配列長で割った余りにすることで循環させる
         const nextRotation = (currentRotation + 1) % tetrominoes[currentBlockIndex].length;
+
+        // 次の回転形状を取得
         const nextBlock = tetrominoes[currentBlockIndex][nextRotation];
 
-        // 回転が可能かをチェック
+        // 回転が可能かどうかを判定
         const isValidRotation = nextBlock.every(index => {
-            const newPos = currentPosition + index;
+            const newPos = currentPosition + index; // 新しい位置を計算
+
+            // 1. グリッドの範囲内に収まるかチェック
             const isWithinBounds = newPos >= 0 && newPos < GRID_HEIGHT * GRID_WIDTH;
+
+            // 2. 左端や右端を越えないかチェック
             const isNotAtEdge = (newPos % GRID_WIDTH >= 0) && (newPos % GRID_WIDTH < GRID_WIDTH);
+
+            // 3. 他の固定ブロックと衝突しないかチェック
             const isFree = !cells[newPos]?.classList.contains('taken');
+
+            // 上記すべての条件を満たす場合のみ回転可能
             return isWithinBounds && isNotAtEdge && isFree;
         });
 
+        // 回転が可能である場合
         if (isValidRotation) {
+            // 現在の回転状態を更新
             currentRotation = nextRotation;
+
+            // 現在のブロック形状を次の形状に更新
             currentBlock = nextBlock;
         }
+
+        // 新しい位置でブロックを描画
         drawBlock();
     }
 }
