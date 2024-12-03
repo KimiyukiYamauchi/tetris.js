@@ -1,0 +1,51 @@
+body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  background: linear-gradient(90deg, #1e3c72, #2a5298);
+}
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.grid {
+  display: grid;
+  grid-template-rows: repeat(20, 20px);
+  grid-template-columns: repeat(10, 20px);
+  gap: 1px;
+  background-color: #444;
+  border: 2px solid #333;
+}
+.cell {
+  width: 20px;
+  height: 20px;
+  background-color: #000;
+}
+.active {
+  background-color: #ff0;
+}
+.highlight {
+  background-color: #f00; /* 赤色でハイライト */
+  animation: blink 1s linear infinite; /* 点滅アニメーション */
+}
+@keyframes blink {
+  0%, 100% {
+      background-color: #f00; /* 赤 */
+  }
+  50% {
+      background-color: #ff8080; /* 明るい赤 */
+  }
+}
+.controls {
+  margin-top: 20px;
+  text-align: center;
+}
+.score {
+  color: #fff;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
