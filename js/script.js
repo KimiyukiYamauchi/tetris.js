@@ -128,8 +128,17 @@ function rotateBlock() {
             // 3. 他の固定ブロックと衝突しないかチェック
             const isFree = !cells[newPos]?.classList.contains('taken');
 
+           // 4. テトロミノのブロックパターンが壊れないかチェック
+            // 左端または右端で回転したときに、グリッド外にはみ出すブロックがないかを確認
+            const isPatternIntact = nextBlock.every(nextIndex => {
+                const projectedPosition = currentPosition + nextIndex;
+                const currentColumn = currentPosition % GRID_WIDTH;
+                const projectedColumn = projectedPosition % GRID_WIDTH;
+                return Math.abs(currentColumn - projectedColumn) <= 4;
+            });
+
             // 上記すべての条件を満たす場合のみ回転可能
-            return isWithinBounds && isNotAtEdge && isFree;
+            return isWithinBounds && isNotAtEdge && isFree && isPatternIntact;
         });
 
         // 回転が可能である場合
@@ -222,6 +231,11 @@ pauseBtn.addEventListener('click', () => {
 });
 
 function startGame() {
+     // グリッド上の全てのセルをリセット
+     cells.forEach(cell => {
+        cell.classList.remove('active', 'taken', 'highlight');
+    });
+    
     // ゲーム開始
     clearInterval(timerId);
     timerId = setInterval(moveDown, 1000);
