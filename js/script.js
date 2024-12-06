@@ -179,14 +179,21 @@ function clearLines() {
 
             rowCells.forEach(cell => cell.classList.add('highlight'));
             setTimeout(() => {
+                // 対象行のセルをリセット
                 rowCells.forEach(cell => cell.classList.remove('taken', 'active', 'highlight'));
+
+                // 上の行を下にシフト
                 for (let i = startIdx - 1; i >= 0; i--) {
                     const aboveCell = cells[i];
                     const belowCell = cells[i + GRID_WIDTH];
-                    belowCell.className = aboveCell.className;
-                    aboveCell.className = 'cell';
+
+                    // `taken` クラスが付いているセルのみシフトする
+                    if (aboveCell.classList.contains('taken')) {
+                        belowCell.className = aboveCell.className; // 下のセルにコピー
+                        aboveCell.className = 'cell'; // 元のセルをリセット
+                    }
                 }
-            }, 1000);
+            }, 500);
         }
     }
 }
