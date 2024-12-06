@@ -30,7 +30,7 @@ body {
 }
 .highlight {
   background-color: #f00; /* 赤色でハイライト */
-  animation: blink 1s linear infinite; /* 点滅アニメーション */
+  animation: blink 500ms linear infinite; /* 点滅アニメーション */
 }
 @keyframes blink {
   0%, 100% {
