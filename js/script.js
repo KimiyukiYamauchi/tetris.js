@@ -211,19 +211,24 @@ function startNewBlock() {
 function checkGameOver() {
     // ゲームオーバー判定
     if (currentBlock.some(index => cells[currentPosition + index].classList.contains('taken'))) {
-        // alert("Game Over!");
-        // clearInterval(timerId);
-
         gameOver();
     }
 }
 
 function gameOver() {
+    // 既存の "Game Over!" メッセージをチェック
+    let gameOverMessage = document.querySelector('.game-over');
+
+    // メッセージが存在しない場合のみ作成
+    if (!gameOverMessage) {
+        gameOverMessage = document.createElement('div');
+        gameOverMessage.className = 'game-over';
+        gameOverMessage.textContent = 'Game Over!';
+        document.body.appendChild(gameOverMessage);
+    }
+
+    // ゲームを停止
     clearInterval(timerId);
-    const gameOverMessage = document.createElement('div');
-    gameOverMessage.className = 'game-over';
-    gameOverMessage.textContent = 'Game Over!';
-    document.body.appendChild(gameOverMessage);
 }
 
 document.addEventListener('keydown', event => {
@@ -248,10 +253,18 @@ pauseBtn.addEventListener('click', () => {
 });
 
 function startGame() {
+
     // "Game Over!" のメッセージを削除
     const gameOverMessage = document.querySelector('.game-over');
     if (gameOverMessage) {
         gameOverMessage.remove();
+    }
+
+    // 一時停止になっている場合はそれをクリア
+    if (isPaused) {
+        pauseBtn.textContent = 'Pause';
+        isPaused = false;
+        timerId = setInterval(moveDown, 1000);
     }
 
      // グリッド上の全てのセルをリセット
