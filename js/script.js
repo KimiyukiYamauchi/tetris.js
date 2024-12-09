@@ -174,8 +174,9 @@ function clearLines() {
         const rowCells = cells.slice(startIdx, startIdx + GRID_WIDTH);
 
         if (rowCells.every(cell => cell.classList.contains('taken'))) {
-            score += 100; // スコアを更新
-            scoreDisplay.textContent = score;
+            // score += 100; // スコアを更新
+            // scoreDisplay.textContent = score;
+            updateScore(100);
 
             rowCells.forEach(cell => cell.classList.add('highlight'));
             setTimeout(() => {
@@ -196,6 +197,18 @@ function clearLines() {
             }, 500);
         }
     }
+}
+
+function adjustSpeed() {
+    clearInterval(timerId);
+    const speed = Math.max(200, 1000 - score); // スコアが上がると速くなる
+    timerId = setInterval(moveDown, speed);
+}
+
+function updateScore(points) {
+    score += points;
+    scoreDisplay.textContent = score;
+    adjustSpeed();
 }
 
 function startNewBlock() {
