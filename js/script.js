@@ -86,7 +86,14 @@ function moveLeft() {
     if (!isPaused) {
         undrawBlock();
         const isAtLeftEdge = currentBlock.some(index => (currentPosition + index) % GRID_WIDTH === 0);
-        if (!isAtLeftEdge) currentPosition -= 1;
+        const isBlocked = currentBlock.some(index => 
+            cells[currentPosition + index - 1]?.classList.contains('taken')
+        );
+
+        if (!isAtLeftEdge && !isBlocked) {
+            currentPosition -= 1;
+        }
+
         drawBlock();
     }
 }
@@ -96,7 +103,14 @@ function moveRight() {
     if (!isPaused) {
         undrawBlock();
         const isAtRightEdge = currentBlock.some(index => (currentPosition + index) % GRID_WIDTH === GRID_WIDTH - 1);
-        if (!isAtRightEdge) currentPosition += 1;
+        const isBlocked = currentBlock.some(index => 
+            cells[currentPosition + index + 1]?.classList.contains('taken')
+        );
+
+        if (!isAtRightEdge && !isBlocked) {
+            currentPosition += 1;
+        }
+
         drawBlock();
     }
 }
