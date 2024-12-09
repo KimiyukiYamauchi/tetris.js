@@ -211,9 +211,19 @@ function startNewBlock() {
 function checkGameOver() {
     // ゲームオーバー判定
     if (currentBlock.some(index => cells[currentPosition + index].classList.contains('taken'))) {
-        alert("Game Over!");
-        clearInterval(timerId);
+        // alert("Game Over!");
+        // clearInterval(timerId);
+
+        gameOver();
     }
+}
+
+function gameOver() {
+    clearInterval(timerId);
+    const gameOverMessage = document.createElement('div');
+    gameOverMessage.className = 'game-over';
+    gameOverMessage.textContent = 'Game Over!';
+    document.body.appendChild(gameOverMessage);
 }
 
 document.addEventListener('keydown', event => {
@@ -238,10 +248,20 @@ pauseBtn.addEventListener('click', () => {
 });
 
 function startGame() {
+    // "Game Over!" のメッセージを削除
+    const gameOverMessage = document.querySelector('.game-over');
+    if (gameOverMessage) {
+        gameOverMessage.remove();
+    }
+
      // グリッド上の全てのセルをリセット
      cells.forEach(cell => {
         cell.classList.remove('active', 'taken', 'highlight');
     });
+
+    // スコアをリセット
+    score = 0;
+    scoreDisplay.textContent = score;
     
     // ゲーム開始
     clearInterval(timerId);
