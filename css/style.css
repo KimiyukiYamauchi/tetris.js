@@ -44,7 +44,7 @@ body {
   margin-top: 20px;
   text-align: center;
 }
-.score {
+.score, .high-score {
   color: #fff;
   margin-bottom: 10px;
   font-size: 18px;

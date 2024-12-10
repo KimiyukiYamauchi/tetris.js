@@ -215,7 +215,7 @@ function clearLines() {
 
 function adjustSpeed() {
     clearInterval(timerId);
-    const speed = Math.max(200, 1000 - score); // スコアが上がると速くなる
+    const speed = Math.max(200, 1000 - score / 2); // スコアが上がると速くなる
     timerId = setInterval(moveDown, speed);
 }
 
@@ -256,6 +256,21 @@ function gameOver() {
 
     // ゲームを停止
     clearInterval(timerId);
+    saveHighScore();
+    displayHighScore();
+}
+
+function saveHighScore() {
+    const highScore = localStorage.getItem('highScore') || 0;
+    if (score > highScore) {
+        localStorage.setItem('highScore', score);
+        alert('New High Score!');
+    }
+}
+
+function displayHighScore() {
+    const highScoreDisplay = document.getElementById('high-score');
+    highScoreDisplay.textContent = `${localStorage.getItem('highScore') || 0}`;
 }
 
 document.addEventListener('keydown', event => {
@@ -302,6 +317,8 @@ function startGame() {
     // スコアをリセット
     score = 0;
     scoreDisplay.textContent = score;
+
+    
     
     // ゲーム開始
     clearInterval(timerId);
@@ -311,3 +328,4 @@ function startGame() {
 
 startBtn.addEventListener('click', startGame); // スタートボタンのクリックイベント
 createGrid(); // グリッドを生成
+displayHighScore(); // ハイスコア表示
